@@ -26,9 +26,10 @@ SECRET_KEY = os.environ.get('SECRET_KEY', default='foo')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = int(os.environ.get('DEBUG', default=0))
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'intense-ravine-55912']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'sheltered-thicket-59711.herokuapp.com']
+CSRF_TRUSTED_ORIGINS=['https://sheltered-thicket-59711.herokuapp.com']
 
-# intense-ravine-55912
+# sheltered-thicket-59711
 # Application definition
 
 INSTALLED_APPS = [
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'app',
     'rest_framework',
     'rest_framework.authtoken',
+    'corsheaders'
 ]
 
 
@@ -50,9 +52,13 @@ REST_FRAMEWORK = {
     ]
 }
 
+CORS_ORIGIN_ALLOW_ALL = True
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

@@ -7,8 +7,17 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from .models import Message
 from .serializers import MessageSerializers
+from django.db.models import Q
 
 
+"""
+1: 
+username - benny
+password - 1234
+2:
+username - abra
+passsword - abra1234
+"""
 
 
 class MessagesAll(APIView):
@@ -20,8 +29,7 @@ class MessagesAll(APIView):
         if not receiver:
             return Response('You cannot send him a message because the user does not exist, Please enter existing user id', status=status.HTTP_404_NOT_FOUND)
         else:
-            receiver = User.objects.get(id=data['receiver'])
-            message = Message(sender=request.user,receiver=receiver,subject=data['subject'],message=data['message'])
+            message = Message(sender=request.user,receiver=receiver[0],subject=data['subject'],message=data['message'])
             message.save()
             return Response('The message has been sent', status=status.HTTP_201_CREATED)
 
@@ -57,17 +65,19 @@ class Messages(APIView):
         if not data:
             return Response('You must be as receiver and have a message with the message ID', status=status.HTTP_404_NOT_FOUND)
         else:
-            message = Message.objects.get(id=id,receiver=request.user)
-            message.read = True
-            message.save()
-            serializer = MessageSerializers(message)
+            data[0].read = True
+            data[0].save()
+            serializer = MessageSerializers(data[0])
             return Response(serializer.data, status=status.HTTP_200_OK)
 
+
     def delete(self,request,id):
-        data = Message.objects.filter(id=id,sender=request.user) or Message.objects.filter(id=id,receiver=request.user)
+        data = Message.objects.filter(id=id)
         if not data:
-            return Response('To delete this message, You need to be sender or receiver and have the id of the message', status=status.HTTP_404_NOT_FOUND)
+            return Response('This ID does not have any message', status=status.HTTP_404_NOT_FOUND)
         else:
-            message = Message.objects.get(id=id)
-            message.delete()
-            return Response('Message deleted', status=status.HTTP_204_NO_CONTENT)
+            if data[0].sender == request.user or data[0].receiver == request.user:
+                data[0].delete()
+                return Response('Message deleted', status=status.HTTP_200_OK)
+            else:
+                return Response('You need to be the sender or the receiver to delete the message', status=status.HTTP_404_NOT_FOUND)
