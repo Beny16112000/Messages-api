@@ -42,12 +42,12 @@ class MessagesAll(APIView):
             serializer = MessageSerializers(data, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
+        
 
+class MessagesUnread(APIView):
+    permission_classes = [IsAuthenticated]
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def unread_messages(request):
-    if request.method == 'GET':
+    def get(self, request):
         data = Message.objects.filter(receiver=request.user,read=False)
         if not data:
             return Response('It appears that you do not have any unread messages', status=status.HTTP_404_NOT_FOUND)
