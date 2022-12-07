@@ -11,6 +11,7 @@ class Message(models.Model):
     message = models.TextField(blank=True)
     created = models.DateTimeField(auto_now_add=True, blank= True)
     read = models.BooleanField(default=False)
+    deleted_by = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        verbose_name_plural = 'Messages'    
+        verbose_name_plural = 'Messages'
