@@ -76,6 +76,7 @@ class Messages(APIView):
         try:
             data = Message.objects.get(id=id)
             if data.sender == request.user or data.receiver == request.user:
+                data.deleted_by = request.user.id
                 data.delete()
                 data.save()
                 return Response('Message deleted', status=status.HTTP_200_OK)
