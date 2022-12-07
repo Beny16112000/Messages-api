@@ -10,6 +10,7 @@ from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 
 
+
 """
 1: 
 username - benny
@@ -36,7 +37,12 @@ class MessagesAll(APIView):
 
 
     def get(self, request):
-        data = Message.objects.filter(receiver=request.user)
+        """
+        from myapp.models import Entry
+        from django.db.models import Q
+        Entry.objects.filter(~Q(id=3))
+        """
+        data = Message.objects.filter(~Q(deleted_by=request.user.id),receiver=request.user)
         if not data:
             return Response('There is no messages for you', status=status.HTTP_404_NOT_FOUND)
         else:
@@ -49,7 +55,7 @@ class MessagesUnread(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        data = Message.objects.filter(receiver=request.user,read=False)
+        data = Message.objects.filter(~Q(deleted_by=request.user.id),receiver=request.user,read=False)
         if not data:
             return Response('There is not unread messages for you', status=status.HTTP_404_NOT_FOUND)
         else:
@@ -76,13 +82,11 @@ class Messages(APIView):
         try:
             data = Message.objects.get(id=id)
             if data.sender == request.user or data.receiver == request.user:
-                data.deleted_by = request.user.id
-                data.delete()
-                data.save()
+                data.deleted_by = request.user.id # Delete only to the user that want to delete.
+                data.save() 
                 return Response('Message deleted', status=status.HTTP_200_OK)
             else:
                 return Response('You need to be the sender or the receiver to delete the message', status=status.HTTP_404_NOT_FOUND)
         except ObjectDoesNotExist:
             return Response('This ID does not have any message', status=status.HTTP_404_NOT_FOUND)
-        
-        
+
