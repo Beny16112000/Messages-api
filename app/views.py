@@ -37,11 +37,6 @@ class MessagesAll(APIView):
 
 
     def get(self, request):
-        """
-        from myapp.models import Entry
-        from django.db.models import Q
-        Entry.objects.filter(~Q(id=3))
-        """
         data = Message.objects.filter(~Q(deleted_by=request.user.id),receiver=request.user)
         if not data:
             return Response('There is no messages for you', status=status.HTTP_404_NOT_FOUND)
