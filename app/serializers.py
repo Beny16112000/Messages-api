@@ -6,7 +6,7 @@ class MessageSerializers(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = [
-            'id',
+            'pk',
             'sender',
             'receiver',
             'subject',
