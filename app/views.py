@@ -20,6 +20,7 @@ from rest_framework.decorators import action
 class MessagesAll(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
+
     def create(self, request):
         data = JSONParser().parse(request)
         try:
@@ -66,8 +67,11 @@ class MessagesAll(viewsets.ModelViewSet):
         try:
             data = Message.objects.get(pk=pk)
             if data.sender == request.user or data.receiver == request.user:
-                data.deleted_by = request.user.id
-                data.save()
+                if data.deleted_by: # I check if one of the users has deleted the message, if so I delete the message completely.
+                    data.delete()
+                else:
+                    data.deleted_by = request.user.id # If only one of the users wants to delete the message then I don't delete it completely, but of course from his point of view the known message has been missed but is still available to the other user. Only if they both delete the message will be deleted completely.
+                    data.save()
                 return Response('Message deleted', status=status.HTTP_200_OK)
             else:
                 return Response('You need to be the sender or the receiver to delete the message', status=status.HTTP_404_NOT_FOUND)
@@ -75,5 +79,4 @@ class MessagesAll(viewsets.ModelViewSet):
             return Response('This ID does not have any message', status=status.HTTP_404_NOT_FOUND)
 
 
-
-
+        
